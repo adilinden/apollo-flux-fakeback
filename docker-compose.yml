@@ -1,0 +1,48 @@
+# apollo-flux staging/PoC stand-in backend
+#   web : Apache + PHP, static page at /, header/diagnostic page at /info (not linked)
+#   ssh : OpenSSH test container for the port-forward test
+#
+# Settings come from .env (see .env.example); every value has a default,
+# so the stack starts without one.
+
+name: apollo-flux
+
+services:
+  web:
+    image: php:8.3-apache
+    container_name: flux-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./web/html:/var/www/html:ro
+      - ./web/private:/var/www/private:ro
+      - ./web/apache/flux.conf:/etc/apache2/conf-enabled/flux.conf:ro
+
+  ssh:
+    image: lscr.io/linuxserver/openssh-server:latest
+    container_name: flux-ssh
+    hostname: apollo-flux-ssh
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+      - USER_NAME=${SSH_USER:-fluxtest}
+      # Key-only by default. For a password test set SSH_PASSWORD_ACCESS=true
+      # and SSH_PASSWORD in .env.
+      - PASSWORD_ACCESS=${SSH_PASSWORD_ACCESS:-false}
+      - USER_PASSWORD=${SSH_PASSWORD:-}
+      # Every file in this directory is read as an authorized public key.
+      - PUBLIC_KEY_DIR=/pubkeys
+      - SUDO_ACCESS=false
+      - LOG_STDOUT=true
+    volumes:
+      - ./ssh/pubkeys:/pubkeys:ro
+      - ssh_config:/config
+    ports:
+      # Host port 2200 -> sshd inside the container (2222).
+      - "${SSH_HOST_PORT:-2200}:2222"
+
+volumes:
+  ssh_config:

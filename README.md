@@ -34,18 +34,18 @@ or any other file in that directory.
 ## Web tests
 
 ```bash
-curl -sI http://172.30.0.50/                  # direct to the backend
-curl -s  http://172.30.0.50/info | head       # direct: no X-Forwarded-* expected
-curl -sI https://apollo-flux.knet.ca/         # through the proxy
-curl -s  https://apollo-flux.knet.ca/info     # through the proxy
+curl -sI http://10.33.89.50/                  # direct to the backend
+curl -s  http://10.33.89.50/info | head       # direct: no X-Forwarded-* expected
+curl -sI https://apollo-flux.example.com/     # through the proxy
+curl -s  https://apollo-flux.example.com/info # through the proxy
 ```
 
 Through the proxy, `/info` should show:
 
-- `REMOTE_ADDR` = `172.28.130.35` (web-proxy1; the backend sees the proxy, not the client)
+- `REMOTE_ADDR` = `10.33.89.100` (web-proxy1 the backend sees the proxy, not the client)
 - `X-Forwarded-For` = your public IP
-- `X-Forwarded-Proto` = `https`, `X-Forwarded-Host` = `apollo-flux.knet.ca`
-- `HTTP_HOST` = `apollo-flux.knet.ca` (Caddy passes the original Host)
+- `X-Forwarded-Proto` = `https`, `X-Forwarded-Host` = `apollo-flux.example.com`
+- `HTTP_HOST` = `apollo-flux.example.com` (Caddy passes the original Host)
 - `REQUEST_SCHEME` = `http` and `HTTPS env` = `(unset)`: the hop to Apache is plain HTTP.
   An app that builds URLs from this would emit `http://`; this is why backends
   need `X-Forwarded-Proto` handling (runbook 4.8).
@@ -58,8 +58,8 @@ Authorization values and shows only their presence.
 Key (default):
 
 ```bash
-ssh -p 2200 -i ~/.ssh/id_ed25519 fluxtest@172.30.0.50          # direct
-ssh -p 2200 -i ~/.ssh/id_ed25519 fluxtest@66.165.220.241       # through the FortiGate
+ssh -p 2200 -i ~/.ssh/id_ed25519 fluxtest@10.33.89.50          # direct
+ssh -p 2200 -i ~/.ssh/id_ed25519 fluxtest@79.165.220.88        # through the proxy
 ```
 
 Password: in `.env` set `SSH_PASSWORD_ACCESS=true` and `SSH_PASSWORD=<something>`, then
