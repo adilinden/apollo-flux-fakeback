@@ -1,5 +1,6 @@
 # apollo-flux staging/PoC stand-in backend
-#   web : Apache + PHP, static page at /, header/diagnostic page at /info (not linked)
+#   web : Apache + PHP on :80 and a self-signed :443, static page at /,
+#         header/diagnostic page at /info (not linked)
 #   ssh : OpenSSH test container for the port-forward test
 #
 # Settings come from .env (see .env.example); every value has a default,
@@ -14,10 +15,14 @@ services:
     restart: unless-stopped
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./web/html:/var/www/html:ro
       - ./web/private:/var/www/private:ro
-      - ./web/apache/flux.conf:/etc/apache2/conf-enabled/flux.conf:ro
+      - ./web/apache/zz-flux.conf:/etc/apache2/conf-enabled/zz-flux.conf:ro
+      - ./web/php/flux.ini:/usr/local/etc/php/conf.d/zz-flux.ini:ro
+      - ./web/apache/zz-ssl.conf:/etc/apache2/conf-enabled/zz-ssl.conf:ro
+      - ./web/tls:/etc/ssl/flux:ro
 
   ssh:
     image: lscr.io/linuxserver/openssh-server:latest
