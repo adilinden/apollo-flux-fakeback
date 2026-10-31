@@ -1,3 +1,5 @@
 ssh/pubkeys/*
 !ssh/pubkeys/.gitkeep
+web/tls/*
+!web/tls/.gitkeep
 .env
